@@ -17,16 +17,16 @@ fun CityMap(lat: Double, lon: Double) {
         factory = { context ->
             Configuration.getInstance().apply {
                 userAgentValue = context.packageName
-                osmdroidBasePath = File(context.filesDir, "osmdroid") // Usa almacenamiento interno
+                osmdroidBasePath = File(context.filesDir, "osmdroid")
                 osmdroidTileCache = File(osmdroidBasePath, "tiles")
             }
 
             MapView(context).apply {
-                setTileSource(TileSourceFactory.MAPNIK) // Usa OpenStreetMap
-                setMultiTouchControls(true) // Permite hacer zoom con los dedos
+                setTileSource(TileSourceFactory.MAPNIK)
+                setMultiTouchControls(true)
 
                 val mapController = controller
-                mapController.setZoom(10.0)
+                mapController.setZoom(13.0)
                 val startPoint = GeoPoint(lat, lon)
                 mapController.setCenter(startPoint)
 

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">UalaChallenge</string>
+    <string name="error_icon">Ups! parece que hubo un error.</string>
 </resources>

@@ -39,7 +39,10 @@ fun CityDetailsScreen(cityId: String?, viewModel: CityDetailsViewModel = hiltVie
     ) { padding ->
         city?.let { city ->
             Column(modifier = Modifier.padding(padding)) {
-                Text(text = "Ubicación: ${city.latitude}, ${city.longitude}", style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = "Ubicación: ${city.latitude}, ${city.longitude}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
                 Spacer(modifier = Modifier.height(16.dp))
                 CityMap(lat = city.latitude, lon = city.longitude)
             }

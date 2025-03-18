@@ -66,9 +66,7 @@ dependencies {
 
     // Persistencia
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.material3.android)
-    ksp(libs.androidx.room.compiler)
 
     // Hilt - Inyección de dependencias
     implementation(libs.hilt.android)
