@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CityListViewModel @Inject constructor(
+class CitiesViewModel @Inject constructor(
     private val citiesRepository: CitiesRepository,
     private val searchCitiesUseCase: SearchCitiesUseCase,
     private val citiesSearchTrie: CitySearchTrie
@@ -33,6 +33,9 @@ class CityListViewModel @Inject constructor(
     val showFavorites: StateFlow<Boolean> = _showFavorites.asStateFlow()
 
     private val _favorites = MutableStateFlow(setOf<String>())
+
+    private val _selectedCity = MutableStateFlow<City?>(null)
+    val selectedCity: StateFlow<City?> = _selectedCity.asStateFlow()
 
     init {
         loadCities()
@@ -53,6 +56,10 @@ class CityListViewModel @Inject constructor(
             _cities.value = searchCitiesUseCase.execute(query, _showFavorites.value, setOf())
             _screenState.value = ScreenState.Success
         }
+    }
+
+    fun onSelectCity(city: City) {
+        _selectedCity.value = city
     }
 
     fun toggleShowFavorites() {

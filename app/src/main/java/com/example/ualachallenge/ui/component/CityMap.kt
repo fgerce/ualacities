@@ -24,17 +24,22 @@ fun CityMap(lat: Double, lon: Double) {
             MapView(context).apply {
                 setTileSource(TileSourceFactory.MAPNIK)
                 setMultiTouchControls(true)
-
-                val mapController = controller
-                mapController.setZoom(13.0)
-                val startPoint = GeoPoint(lat, lon)
-                mapController.setCenter(startPoint)
-
-                val marker = Marker(this)
-                marker.position = startPoint
-                marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                overlays.add(marker)
             }
+        },
+        update = { mapView ->
+            val mapController = mapView.controller
+            val newPoint = GeoPoint(lat, lon)
+
+            mapController.setCenter(newPoint)
+            mapController.setZoom(13.0)
+
+            mapView.overlays.clear()
+            val marker = Marker(mapView).apply {
+                position = newPoint
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+            }
+            mapView.overlays.add(marker)
+            mapView.invalidate()
         },
         modifier = Modifier.fillMaxSize()
     )

@@ -20,34 +20,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.ualachallenge.domain.model.City
 import com.example.ualachallenge.ui.component.CityMap
-import com.example.ualachallenge.ui.viewModels.CityDetailsViewModel
+import com.example.ualachallenge.ui.viewModels.CitiesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CityDetailsScreen(cityId: String?, viewModel: CityDetailsViewModel = hiltViewModel()) {
-    val city by viewModel.city.collectAsState()
-
-    LaunchedEffect(cityId) {
-        cityId?.let { viewModel.loadCity(it) }
-    }
-
+fun CityDetailsScreen(viewModel: CitiesViewModel) {
+    val city by viewModel.selectedCity.collectAsState()
     Scaffold(
         topBar = {
             TopAppBar(title = { Text(city?.name ?: "Detalles de la ciudad") })
         }
     ) { padding ->
-        city?.let { city ->
+        city.let { city ->
             Column(modifier = Modifier.padding(padding)) {
-                Text(
-                    text = "Ubicación: ${city.latitude}, ${city.longitude}",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                CityMap(lat = city.latitude, lon = city.longitude)
+                if (city != null) {
+                    Text(
+                        text = "Ubicación: ${city.latitude}, ${city.longitude}",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    CityMap(lat = city.latitude, lon = city.longitude)
+                } else {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
             }
-        } ?: Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
         }
     }
 }

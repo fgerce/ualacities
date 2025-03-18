@@ -16,11 +16,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.ualachallenge.R
 import com.example.ualachallenge.ui.component.CityItem
-import com.example.ualachallenge.ui.viewModels.CityListViewModel
+import com.example.ualachallenge.ui.viewModels.CitiesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CityListScreen(navController: NavController, viewModel: CityListViewModel = hiltViewModel()) {
+fun CityListScreen(navController: NavController?, viewModel: CitiesViewModel) {
     val screenState by viewModel.screenState.collectAsState()
     val cities by viewModel.cities.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -73,7 +73,8 @@ fun CityListScreen(navController: NavController, viewModel: CityListViewModel = 
                         ) {
                             items(cities) { city ->
                                 CityItem(city, onClick = {
-                                    navController.navigate("city_details/${city.id}")
+                                    viewModel.onSelectCity(city)
+                                    navController?.navigate("city_details")
                                 })
                             }
                         }
