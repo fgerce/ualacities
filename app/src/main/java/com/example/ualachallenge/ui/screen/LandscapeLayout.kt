@@ -14,7 +14,8 @@ fun LandscapeLayout(viewModel: CitiesViewModel) {
         Column(modifier = Modifier.weight(1f)) {
             CityListScreen(
                 navController = null,
-                viewModel
+                viewModel,
+                true
             )
         }
 

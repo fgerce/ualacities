@@ -8,26 +8,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFF6200EE),
-    secondary = Color(0xFF03DAC6),
+    primary = Color(0xFF1E3A8A),
+    secondary = Color(0xFF10B981),
     background = Color(0xFF121212),
-    surface = Color(0xFF121212),
+    surface = Color(0xFF1F1F1F),
     onPrimary = Color.White,
-    onSecondary = Color.Black,
+    onSecondary = Color.White,
     onBackground = Color.White,
     onSurface = Color.White
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF6200EE),
+    primary = Color(0xFF4CAF50),
     secondary = Color(0xFF03DAC6),
     background = Color.White,
-    surface = Color.White,
-    onPrimary = Color.White,
+    surface = Color(0xFFF5F5F5),
+    onPrimary = Color.Black,
     onSecondary = Color.Black,
     onBackground = Color.Black,
     onSurface = Color.Black
 )
+
 
 @Composable
 fun UalaTheme(

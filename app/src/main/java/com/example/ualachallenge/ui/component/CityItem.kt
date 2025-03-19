@@ -15,14 +15,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
 
 @Composable
-fun CityItem(city: City, onClick: () -> Unit) {
+fun CityItem(city: City, onClick: () -> Unit, isSelected: Boolean) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(8.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+            else MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
