@@ -2,68 +2,89 @@ package com.example.ualachallenge.ui.viewModels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ualachallenge.data.repository.CitiesRepository
 import com.example.ualachallenge.domain.model.City
-import com.example.ualachallenge.domain.search.CitySearchTrie
+import com.example.ualachallenge.domain.model.CityWithFavorite
+import com.example.ualachallenge.domain.usecase.GetCitiesWithFavoritesUseCase
 import com.example.ualachallenge.domain.usecase.SearchCitiesUseCase
+import com.example.ualachallenge.domain.usecase.ToggleFavoriteUseCase
 import com.example.ualachallenge.ui.screen.ScreenState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CitiesViewModel @Inject constructor(
-    private val citiesRepository: CitiesRepository,
     private val searchCitiesUseCase: SearchCitiesUseCase,
-    private val citiesSearchTrie: CitySearchTrie
+    private val getCitiesWithFavoritesUseCase: GetCitiesWithFavoritesUseCase,
+    private val toggleFavoriteUseCase: ToggleFavoriteUseCase,
 ) : ViewModel() {
     private val _screenState = MutableStateFlow<ScreenState>(ScreenState.Loading)
     val screenState: StateFlow<ScreenState> = _screenState.asStateFlow()
 
-    private val _cities = MutableStateFlow<List<City>>(emptyList())
-    val cities: StateFlow<List<City>> = _cities.asStateFlow()
+    private val _showFavorites = MutableStateFlow(false)
+    val showFavorites: StateFlow<Boolean> = _showFavorites.asStateFlow()
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    private val _showFavorites = MutableStateFlow(false)
-    val showFavorites: StateFlow<Boolean> = _showFavorites.asStateFlow()
+    val cities: StateFlow<List<CityWithFavorite>> =
+        getCitiesWithFavoritesUseCase()
+            .combine(_showFavorites) { cities, showFavorites ->
+                if (showFavorites) cities.filter { it.isFavorite } else cities
+            }
+            .mapLatest { cities ->
+                _screenState.value =
+                    if (cities.isNotEmpty()) {
+                        ScreenState.Success
+                    } else {
+                        ScreenState.Error("No cities found")
+                    }
+                cities
+            }
+            .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    private val _favorites = MutableStateFlow(setOf<String>())
+
+    val searchResults: StateFlow<List<CityWithFavorite>> = _searchQuery
+        .debounce(300)
+        .combine(getCitiesWithFavoritesUseCase()) { query, citiesWithFavorites ->
+            if (query.isBlank()) emptyList()
+            else {
+                val matchingCities = searchCitiesUseCase(query)
+                matchingCities.map { city ->
+                    val isFavorite =
+                        citiesWithFavorites.any { it.city.id == city.id && it.isFavorite }
+                    CityWithFavorite(city, isFavorite)
+                }
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     private val _selectedCity = MutableStateFlow<City?>(null)
     val selectedCity: StateFlow<City?> = _selectedCity.asStateFlow()
 
-    init {
-        loadCities()
+    fun toggleFavorite(city: City) {
+        viewModelScope.launch {
+            toggleFavoriteUseCase(city.id)
+        }
     }
 
-    private fun loadCities() {
-        viewModelScope.launch {
-            citiesSearchTrie.initialize(citiesRepository.fetchCities())
-            _cities.value = searchCitiesUseCase.execute(_searchQuery.value, _showFavorites.value, _favorites.value)
-            _screenState.value = ScreenState.Success
-        }
+    fun setShowFavorites(show: Boolean) {
+        _showFavorites.value = show
     }
 
     fun onSearchQueryChanged(query: String) {
-        viewModelScope.launch {
-            _screenState.value = ScreenState.Loading
-            _searchQuery.value = query
-            _cities.value = searchCitiesUseCase.execute(query, _showFavorites.value, setOf())
-            _screenState.value = ScreenState.Success
-        }
+        _searchQuery.value = query
     }
 
-    fun onSelectCity(city: City) {
+    fun setSelectedCity(city: City?) {
         _selectedCity.value = city
-    }
-
-    fun toggleShowFavorites() {
-        _showFavorites.value = !_showFavorites.value
-        onSearchQueryChanged(_searchQuery.value)
     }
 }

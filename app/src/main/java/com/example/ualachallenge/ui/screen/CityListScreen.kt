@@ -98,13 +98,14 @@ fun CityListScreen(
                         LazyColumn(
                             modifier = Modifier.fillMaxSize()
                         ) {
-                            items(cities) { city ->
+                            items(cities) { cityWithFavorite ->
                                 CityItem(
-                                    city, onClick = {
-                                        viewModel.onSelectCity(city)
+                                    cityWithFavorite, onClick = {
+                                        viewModel.setSelectedCity(cityWithFavorite.city)
                                         navController?.navigate("city_details")
                                     },
-                                    isSelected = isLandscape && city.id == selectedCity.value?.id
+                                    isSelected = isLandscape && cityWithFavorite.city.id == selectedCity.value?.id,
+                                    onFavoriteClick = { viewModel.toggleFavorite(it) }
                                 )
                             }
                         }

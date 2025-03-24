@@ -45,6 +45,7 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.material3.android)
 
     // Jetpack Compose
     implementation(libs.androidx.ui)
@@ -65,7 +66,6 @@ dependencies {
 
     // Persistencia
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.material3.android)
 
     // Hilt - Inyección de dependencias
     implementation(libs.hilt.android)
