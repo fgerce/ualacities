@@ -62,7 +62,7 @@ class CitySearchTrie {
             stack.addAll(current.children.values)
         }
 
-        return result.sortedBy { it.name }
+        return result.sortedWith(compareBy({ it.name }, { it.country }))
     }
 
     private class TrieNode {

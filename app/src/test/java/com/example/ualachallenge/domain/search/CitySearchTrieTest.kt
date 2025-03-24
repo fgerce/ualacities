@@ -13,11 +13,13 @@ class CitySearchTrieTest {
     private val city3 = City(3, "London", "United Kingdom", 51.51, -0.13)
     private val city4 = City(4, "Barcelona", "Spain", 41.38, 2.18)
     private val city5 = City(5, "Bangkok", "Thailand", 13.76, 100.51)
+    private val city6 = City(6, "Valencia", "Spain", 39.47, -0.38)
+    private val city7 = City(7, "Valencia", "Colombia", 8.25, -76.15)
 
     @Before
     fun setUp() {
         sut = CitySearchTrie()
-        sut.initialize(listOf(city1, city2, city3, city4, city5))
+        sut.initialize(listOf(city1, city2, city3, city4, city5, city6, city7))
     }
 
     @Test
@@ -29,6 +31,19 @@ class CitySearchTrieTest {
         assertEquals("Buenos Aires", result[2].name)
 
         assertEquals(result.size, 3)
+    }
+
+    @Test
+    fun `test search returns cities sorted alphabetically by city and by country`() {
+        val result = sut.search("v")
+
+        assertEquals("Valencia", result[0].name)
+        assertEquals("Valencia", result[1].name)
+
+        assertEquals("Colombia", result[0].country)
+        assertEquals("Spain", result[1].country)
+
+        assertEquals(result.size, 2)
     }
 
     @Test
