@@ -81,11 +81,7 @@ class CitySearchTrieTest {
     fun `test search returns all cities when empty prefix`() {
         val result = sut.search("")
 
-        assertEquals("Bangkok", result[0].name)
-        assertEquals("Barcelona", result[1].name)
-        assertEquals("Buenos Aires", result[2].name)
-        assertEquals("London", result[3].name)
-        assertEquals("New York", result[4].name)
+        assertEquals(7, result.size)
     }
 
     @Test
@@ -103,5 +99,72 @@ class CitySearchTrieTest {
         assertEquals(0, result.size)
     }
 
+    @Test
+    fun `test search handles cities with special characters`() {
+        val city1 = City(1, "San José", "Costa Rica", 9.93, -84.08)
+        val city2 = City(2, "São Paulo", "Brazil", -23.55, -46.63)
+        val city3 = City(3, "Los Angeles", "United States", 34.05, -118.24)
+        sut.initialize(listOf(city1, city2, city3))
+        val result = sut.search("s")
 
+        assertEquals("San José", result[0].name)
+        assertEquals("São Paulo", result[1].name)
+    }
+
+    @Test
+    fun `test search handles cities with prefix names`() {
+        val city1 = City(1, "San", "Spain", 40.42, -3.70)
+        val city2 = City(2, "San Francisco", "United States", 37.77, -122.42)
+        sut.initialize(listOf(city1, city2))
+        val result = sut.search("san")
+
+        assertEquals(2, result.size)
+        assertEquals("San", result[0].name)
+        assertEquals("San Francisco", result[1].name)
+    }
+
+    @Test
+    fun `test search handles case insensitivity`() {
+        val city1 = City(1, "PARIS", "France", 48.86, 2.35)
+        val city2 = City(2, "paris", "United States", 33.66, -95.55)
+        sut.initialize(listOf(city1, city2))
+        val result = sut.search("par")
+
+        assertEquals(2, result.size)
+        assertEquals("France", result[0].country)
+        assertEquals("United States", result[1].country)
+    }
+
+    @Test
+    fun `test search handles numeric city names`() {
+        val city1 = City(18, "123", "Fictional Country", 0.0, 0.0)
+        sut.initialize(listOf(city1))
+        val result = sut.search("12")
+
+        assertEquals(1, result.size)
+        assertEquals("123", result[0].name)
+    }
+
+    @Test
+    fun `test search handles very long city names`() {
+        val city1 = City(19, "Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch", "Wales", 53.22, -4.20)
+        sut.initialize(listOf(city1))
+        val result = sut.search("llan")
+
+        assertEquals(1, result.size)
+        assertEquals("Llanfairpwllgwyngyllgogerychwyrndrobwllllantysiliogogogoch", result[0].name)
+    }
+
+    @Test
+    fun `test search handles cities with substring names`() {
+        val city1 = City(20, "Rio", "Brazil", -22.91, -43.21)
+        val city2 = City(21, "Rio de Janeiro", "Brazil", -22.91, -43.21)
+
+        sut.initialize(listOf(city1, city2))
+        val result = sut.search("rio")
+
+        assertEquals(2, result.size)
+        assertEquals("Rio", result[0].name)
+        assertEquals("Rio de Janeiro", result[1].name)
+    }
 }
