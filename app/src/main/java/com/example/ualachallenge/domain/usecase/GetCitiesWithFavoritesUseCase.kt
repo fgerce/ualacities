@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
 class GetCitiesWithFavoritesUseCase(
-    private val citiesRepository: CitiesRepository
+    private val citiesRepository: CitiesRepository,
 ) {
     operator fun invoke(): Flow<List<CityWithFavorite>> {
         return combine(

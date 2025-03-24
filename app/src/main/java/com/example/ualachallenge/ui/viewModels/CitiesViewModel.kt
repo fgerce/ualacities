@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -35,35 +34,32 @@ class CitiesViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    val cities: StateFlow<List<CityWithFavorite>> =
-        getCitiesWithFavoritesUseCase()
-            .combine(_showFavorites) { cities, showFavorites ->
-                if (showFavorites) cities.filter { it.isFavorite } else cities
-            }
-            .mapLatest { cities ->
-                _screenState.value =
-                    if (cities.isNotEmpty()) {
-                        ScreenState.Success
-                    } else {
-                        ScreenState.Error("No cities found")
-                    }
-                cities
-            }
-            .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    val searchResults: StateFlow<List<CityWithFavorite>> = combine(
+        _searchQuery,
+        getCitiesWithFavoritesUseCase(),
+        _showFavorites
+    ) { query, citiesWithFavorites, showFavorites ->
+        val cities = citiesWithFavorites.map { it.city }
+        if (cities.isNotEmpty()) {
+            searchCitiesUseCase.initializeCities(cities)
+        }
 
+        val matchingCities = searchCitiesUseCase(query).map { city ->
+            val isFavorite = citiesWithFavorites.any { it.city.id == city.id && it.isFavorite }
+            CityWithFavorite(city, isFavorite)
+        }
 
-    val searchResults: StateFlow<List<CityWithFavorite>> = _searchQuery
-        .debounce(300)
-        .combine(getCitiesWithFavoritesUseCase()) { query, citiesWithFavorites ->
-            if (query.isBlank()) emptyList()
-            else {
-                val matchingCities = searchCitiesUseCase(query)
-                matchingCities.map { city ->
-                    val isFavorite =
-                        citiesWithFavorites.any { it.city.id == city.id && it.isFavorite }
-                    CityWithFavorite(city, isFavorite)
+        if (showFavorites) matchingCities.filter { it.isFavorite }
+        else matchingCities
+    }
+        .mapLatest { cities ->
+            _screenState.value =
+                if (cities.isNotEmpty()) {
+                    ScreenState.Success
+                } else {
+                    ScreenState.Error("No cities found")
                 }
-            }
+            cities
         }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
@@ -76,8 +72,8 @@ class CitiesViewModel @Inject constructor(
         }
     }
 
-    fun setShowFavorites(show: Boolean) {
-        _showFavorites.value = show
+    fun toggleShowFavorites() {
+        _showFavorites.value = !_showFavorites.value
     }
 
     fun onSearchQueryChanged(query: String) {

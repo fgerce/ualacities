@@ -1,8 +1,11 @@
 package com.example.ualachallenge.ui.screen
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,9 +45,10 @@ fun CityListScreen(
     isLandscape: Boolean,
 ) {
     val screenState by viewModel.screenState.collectAsState()
-    val cities by viewModel.cities.collectAsState()
+    val cities by viewModel.searchResults.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val selectedCity = viewModel.selectedCity.collectAsState()
+    val showFavorites by viewModel.showFavorites.collectAsState()
 
     Scaffold { padding ->
         Box(
@@ -52,66 +57,114 @@ fun CityListScreen(
                 .padding(padding),
             contentAlignment = Alignment.Center
         ) {
-            when (val state = screenState) {
-                is ScreenState.Loading -> {
-                    CircularProgressIndicator()
-                }
 
-                is ScreenState.Error -> {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_error),
-                            contentDescription = stringResource(R.string.error_icon),
-                            modifier = Modifier.size(100.dp)
+            Column(
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = viewModel::onSearchQueryChanged,
+                    placeholder = { Text("Filter") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    singleLine = true,
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = "Search Icon"
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = state.message,
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+                    },
+                    enabled = screenState is ScreenState.Success
+                )
+
+                ToggleButton(
+                    isSelected = showFavorites,
+                    onToggle = { viewModel.toggleShowFavorites() }
+                )
+                when (val state = screenState) {
+                    is ScreenState.Loading -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+
                     }
-                }
 
-                is ScreenState.Success -> {
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        OutlinedTextField(
-                            value = searchQuery,
-                            onValueChange = viewModel::onSearchQueryChanged,
-                            placeholder = { Text("Filter") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            shape = RoundedCornerShape(24.dp),
-                            singleLine = true,
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Filled.Search,
-                                    contentDescription = "Search Icon"
+                    is ScreenState.Error -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.ic_error),
+                                    contentDescription = stringResource(R.string.error_icon),
+                                    modifier = Modifier.size(100.dp)
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = state.message,
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
                             }
-                        )
+                        }
+                    }
 
+                    is ScreenState.Success -> {
+                        Column(modifier = Modifier.fillMaxSize()) {
 
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize()
-                        ) {
-                            items(cities) { cityWithFavorite ->
-                                CityItem(
-                                    cityWithFavorite, onClick = {
-                                        viewModel.setSelectedCity(cityWithFavorite.city)
-                                        navController?.navigate("city_details")
-                                    },
-                                    isSelected = isLandscape && cityWithFavorite.city.id == selectedCity.value?.id,
-                                    onFavoriteClick = { viewModel.toggleFavorite(it) }
-                                )
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                items(cities) { cityWithFavorite ->
+                                    CityItem(
+                                        cityWithFavorite, onClick = {
+                                            viewModel.setSelectedCity(cityWithFavorite.city)
+                                            navController?.navigate("city_details")
+                                        },
+                                        isSelected = isLandscape && cityWithFavorite.city.id == selectedCity.value?.id,
+                                        onFavoriteClick = { viewModel.toggleFavorite(it) }
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ToggleButton(isSelected: Boolean, onToggle: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        TextButton(
+            onClick = onToggle,
+            modifier = Modifier
+                .padding(8.dp)
+                .background(
+                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(16.dp)
+                )
+                .padding(vertical = 8.dp, horizontal = 16.dp),
+        ) {
+            Text(
+                text = if (isSelected) "Mostrar Todos" else "Mostrar Favoritos",
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }

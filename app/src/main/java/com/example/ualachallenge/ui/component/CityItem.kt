@@ -16,6 +16,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -23,7 +24,12 @@ import com.example.ualachallenge.domain.model.City
 import com.example.ualachallenge.domain.model.CityWithFavorite
 
 @Composable
-fun CityItem(cityWithFavorite: CityWithFavorite, onClick: () -> Unit, isSelected: Boolean, onFavoriteClick: (City) -> Unit) {
+fun CityItem(
+    cityWithFavorite: CityWithFavorite,
+    onClick: () -> Unit,
+    isSelected: Boolean,
+    onFavoriteClick: (City) -> Unit,
+) {
     val city = cityWithFavorite.city
     val isFavorite = cityWithFavorite.isFavorite
     Card(
@@ -39,7 +45,7 @@ fun CityItem(cityWithFavorite: CityWithFavorite, onClick: () -> Unit, isSelected
         )
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "${city.name}, ${city.country}",
                     style = MaterialTheme.typography.titleMedium
@@ -49,7 +55,11 @@ fun CityItem(cityWithFavorite: CityWithFavorite, onClick: () -> Unit, isSelected
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
-            IconButton(onClick = { onFavoriteClick(city) }) {
+            IconButton(
+                onClick = { onFavoriteClick(city) },
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+            ) {
                 Icon(
                     imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                     contentDescription = "Favorite",
