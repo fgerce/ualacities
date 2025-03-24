@@ -75,8 +75,7 @@ fun CityListScreen(
                             imageVector = Icons.Filled.Search,
                             contentDescription = "Search Icon"
                         )
-                    },
-                    enabled = screenState is ScreenState.Success
+                    }
                 )
 
                 ToggleButton(
