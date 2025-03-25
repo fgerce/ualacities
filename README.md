@@ -1,4 +1,4 @@
-## Arquitectura
+# Arquitectura
 
 La aplicación sigue los principios de **Clean Architecture**, dividiéndose en las siguientes capas:
 
