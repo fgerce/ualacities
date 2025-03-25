@@ -1,9 +1,13 @@
 package com.example.ualachallenge.di
 
+import android.content.Context
+import android.net.ConnectivityManager
 import com.example.ualachallenge.data.remote.CitiesApi
+import com.example.ualachallenge.data.remote.NetworkUtils
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -22,6 +26,18 @@ object NetworkModule {
             .build()
     }
 
+    @Provides
+    @Singleton
+    fun provideConnectivityManager(@ApplicationContext context: Context): ConnectivityManager {
+        return context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    }
+
+    @Provides
+    @Singleton
+    fun provideNetworkUtils(connectivityManager: ConnectivityManager): NetworkUtils {
+        return NetworkUtils(connectivityManager)
+    }
+    
     @Provides
     @Singleton
     fun provideCitiesApi(retrofit: Retrofit): CitiesApi {

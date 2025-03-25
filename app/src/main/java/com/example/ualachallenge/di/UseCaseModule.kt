@@ -2,8 +2,9 @@ package com.example.ualachallenge.di
 
 import com.example.ualachallenge.data.local.FavoritesDataStore
 import com.example.ualachallenge.data.repository.CitiesRepository
-import com.example.ualachallenge.domain.search.CitySearchTrie
-import com.example.ualachallenge.domain.usecase.GetCitiesWithFavoritesUseCase
+import com.example.ualachallenge.domain.search.CitySearchEngine
+import com.example.ualachallenge.domain.usecase.GetCitiesUseCase
+import com.example.ualachallenge.domain.usecase.GetFavoritesIDsUseCase
 import com.example.ualachallenge.domain.usecase.SearchCitiesUseCase
 import com.example.ualachallenge.domain.usecase.ToggleFavoriteUseCase
 import dagger.Module
@@ -19,20 +20,26 @@ object UseCaseModule {
 
     @Provides
     @Singleton
-    fun provideCitySearchTrie(): CitySearchTrie {
-        return CitySearchTrie()
+    fun provideCitySearchTrie(): CitySearchEngine {
+        return CitySearchEngine()
     }
 
     @Provides
     @Singleton
-    fun provideSearchCitiesUseCase(trie: CitySearchTrie): SearchCitiesUseCase {
+    fun provideSearchCitiesUseCase(trie: CitySearchEngine): SearchCitiesUseCase {
         return SearchCitiesUseCase(trie)
     }
 
     @Provides
     @Singleton
-    fun provideGetCitiesWithFavoritesUseCase(citiesRepository: CitiesRepository): GetCitiesWithFavoritesUseCase {
-        return GetCitiesWithFavoritesUseCase(citiesRepository)
+    fun provideGetCitiesUseCase(citiesRepository: CitiesRepository): GetCitiesUseCase {
+        return GetCitiesUseCase(citiesRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetCitiesWithFavoritesUseCase(dataStore: FavoritesDataStore): GetFavoritesIDsUseCase {
+        return GetFavoritesIDsUseCase(dataStore)
     }
 
     @Provides

@@ -1,8 +1,10 @@
 package com.example.ualachallenge.di
 
 import android.content.Context
+import android.net.ConnectivityManager
 import com.example.ualachallenge.data.local.FavoritesDataStore
 import com.example.ualachallenge.data.remote.CitiesApi
+import com.example.ualachallenge.data.remote.NetworkUtils
 import com.example.ualachallenge.data.repository.CitiesRepository
 import dagger.Module
 import dagger.Provides
@@ -23,7 +25,11 @@ object DataModule {
 
     @Provides
     @Singleton
-    fun provideCitiesRepository(api: CitiesApi, dataStore: FavoritesDataStore): CitiesRepository {
-        return CitiesRepository(api, dataStore)
+    fun provideCitiesRepository(
+        api: CitiesApi,
+        networkUtils: NetworkUtils,
+    ): CitiesRepository {
+        return CitiesRepository(api, networkUtils)
     }
+
 }

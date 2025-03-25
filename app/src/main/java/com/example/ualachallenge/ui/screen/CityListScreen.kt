@@ -45,7 +45,7 @@ fun CityListScreen(
     isLandscape: Boolean,
 ) {
     val screenState by viewModel.screenState.collectAsState()
-    val cities by viewModel.searchResults.collectAsState()
+    val cities by viewModel.citiesResult.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val selectedCity = viewModel.selectedCity.collectAsState()
     val showFavorites by viewModel.showFavorites.collectAsState()
@@ -75,13 +75,20 @@ fun CityListScreen(
                             imageVector = Icons.Filled.Search,
                             contentDescription = "Search Icon"
                         )
-                    }
+                    },
+                    enabled = screenState != ScreenState.Loading
                 )
 
                 ToggleButton(
                     isSelected = showFavorites,
-                    onToggle = { viewModel.toggleShowFavorites() }
+                    onToggle = { viewModel.toggleShowFavorites() },
+                    enabled = screenState != ScreenState.Loading
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+                if(cities.isNotEmpty()) {
+                    Text("Results count: ${cities.size}")
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
                 when (val state = screenState) {
                     is ScreenState.Loading -> {
                         Box(
@@ -119,12 +126,11 @@ fun CityListScreen(
                     is ScreenState.Success -> {
                         Column(modifier = Modifier.fillMaxSize()) {
 
-                            LazyColumn(
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                items(cities) { cityWithFavorite ->
+                            LazyColumn {
+                                items(cities, key = { it.city.id }) { cityWithFavorite ->
                                     CityItem(
-                                        cityWithFavorite, onClick = {
+                                        cityWithFavorite,
+                                        onClick = {
                                             viewModel.setSelectedCity(cityWithFavorite.city)
                                             navController?.navigate("city_details")
                                         },
@@ -142,7 +148,7 @@ fun CityListScreen(
 }
 
 @Composable
-fun ToggleButton(isSelected: Boolean, onToggle: () -> Unit) {
+fun ToggleButton(isSelected: Boolean, onToggle: () -> Unit, enabled: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -158,11 +164,12 @@ fun ToggleButton(isSelected: Boolean, onToggle: () -> Unit) {
                     shape = RoundedCornerShape(16.dp)
                 )
                 .padding(vertical = 8.dp, horizontal = 16.dp),
+            enabled = enabled
         ) {
             Text(
-                text = if (isSelected) "Mostrar Todos" else "Mostrar Favoritos",
+                text = if (isSelected) "Show All" else "Show favorites",
                 style = MaterialTheme.typography.bodyLarge,
-                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
             )
         }
     }
